@@ -316,19 +316,4 @@ Thank You ❤️
             st.error(
                 "Donor not found"
             )
-            # Remove duplicates
-unique_donors = []
-seen = set()
-
-for donor in st.session_state.donors:
-    key = (
-        donor["Name"].lower(),
-        donor["Blood Group"],
-        donor["City"].lower()
-    )
-
-    if key not in seen:
-        seen.add(key)
-        unique_donors.append(donor)
-
-st.session_state.donors = unique_donors
+        
