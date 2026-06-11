@@ -152,6 +152,19 @@ elif menu == "View Donors":
 
     else:
         st.info("No donors")
+        st.subheader("Delete Donor")
+
+donor_name = st.text_input("Enter Donor Name to Delete")
+
+if st.button("Delete Donor"):
+    donors_df = donors_df[
+        donors_df["Name"].str.lower()
+        != donor_name.lower()
+    ]
+
+    donors_df.to_csv(FILE, index=False)
+
+    st.success(f"{donor_name} deleted successfully!")
 
 # SEARCH
 elif menu == "Search Blood Group":
