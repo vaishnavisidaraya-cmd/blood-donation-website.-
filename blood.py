@@ -21,7 +21,7 @@ menu = st.sidebar.selectbox(
 if menu == "Home":
     st.title("🩸 Blood Donation System")
 
-    st.image("blood.png", use_container_width=True)
+    st.image("blood.jpeg", use_container_width=True)
 
     st.write("Welcome ❤️ Save Lives by Donating Blood")
 
