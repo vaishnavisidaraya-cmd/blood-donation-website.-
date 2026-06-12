@@ -1,45 +1,36 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import os
 
-# SESSION STATE
-if "donors" not in st.session_state:
-    st.session_state.donors = []
+FILE = "donors.csv"
 
-# MENU
+# Create CSV if not exists
+if not os.path.exists(FILE):
+    df = pd.DataFrame(columns=[
+        "Name","Age","Weight","Blood Group","City","Phone","Email","Date"
+    ])
+    df.to_csv(FILE, index=False)
+
 menu = st.sidebar.selectbox(
     "Menu",
-    [
-        "Home",
-        "Register Donor",
-        "View Donors",
-        "Search Blood Group",
-        "Blood Request",
-        "Total Donors",
-        "Certificate"
-    ]
+    ["Home","Register Donor","View Donors","Search Blood Group","Blood Request","Total Donors","Certificate"]
 )
 
 # ---------------- HOME ----------------
 if menu == "Home":
     st.title("🩸 Blood Donation System")
 
-    try:
-        st.image("blood.jpeg", use_container_width=True)
-    except:
-        st.warning("blood.jpeg not found")
+    st.image("blood.png", use_container_width=True)
 
-    st.write("Welcome ❤️ Help save lives")
+    st.write("Welcome ❤️ Save Lives by Donating Blood")
 
 # ---------------- REGISTER ----------------
 elif menu == "Register Donor":
 
     st.header("Register Donor")
 
-    try:
-        st.image("donation.jpeg", use_container_width=True)
-    except:
-        pass
+    st.image("donation.jpeg", use_container_width=True)
 
     name = st.text_input("Name")
     age = st.number_input("Age", 1, 100)
@@ -51,24 +42,17 @@ elif menu == "Register Donor":
     )
 
     city = st.text_input("City")
-
-    phone = st.text_input("Phone Number")
-    email = st.text_input("Email ID")
+    phone = st.text_input("Phone")
+    email = st.text_input("Email")
 
     if st.button("Register"):
 
-        if name == "":
-            st.error("Enter Name")
-        elif len(phone) != 10:
-            st.error("❌ Invalid Phone Number")
-        elif "@" not in email:
-            st.error("❌ Invalid Email ID")
-        elif age < 18:
-            st.error("❌ Not Eligible (Age < 18)")
+        if age < 18:
+            st.error("❌ Age must be 18+")
         elif weight < 40:
-            st.error("❌ Not Eligible (Weight < 40kg)")
+            st.error("❌ Weight must be 40kg+")
         else:
-            st.session_state.donors.append({
+            new_data = pd.DataFrame([{
                 "Name": name,
                 "Age": age,
                 "Weight": weight,
@@ -77,8 +61,9 @@ elif menu == "Register Donor":
                 "Phone": phone,
                 "Email": email,
                 "Date": datetime.now().strftime("%d-%m-%Y")
-            })
+            }])
 
+            new_data.to_csv(FILE, mode="a", header=False, index=False)
             st.success("✅ Registered Successfully")
 
 # ---------------- VIEW + DELETE + GRAPH ----------------
@@ -86,26 +71,23 @@ elif menu == "View Donors":
 
     st.header("Registered Donors")
 
-    try:
-        st.image("donation.png", use_container_width=True)
-    except:
-        pass
+    st.image("donation.jpeg", use_container_width=True)
 
-    if st.session_state.donors:
+    df = pd.read_csv(FILE)
 
-        df = pd.DataFrame(st.session_state.donors)
+    if df.empty:
+        st.info("No donors found")
+    else:
         st.dataframe(df)
 
         st.info(f"Total Donors: {len(df)}")
 
         # DELETE
-        delete_name = st.selectbox("Delete Donor", df["Name"])
+        name_del = st.selectbox("Delete Donor", df["Name"])
 
         if st.button("Delete"):
-            st.session_state.donors = [
-                d for d in st.session_state.donors
-                if d["Name"] != delete_name
-            ]
+            df = df[df["Name"] != name_del]
+            df.to_csv(FILE, index=False)
             st.success("Deleted Successfully")
             st.rerun()
 
@@ -113,13 +95,14 @@ elif menu == "View Donors":
         st.subheader("Blood Group Distribution")
         st.bar_chart(df["Blood Group"].value_counts())
 
-    else:
-        st.info("No donors registered")
-
 # ---------------- SEARCH ----------------
 elif menu == "Search Blood Group":
 
     st.header("Search Donors")
+
+    st.image("donation.jpeg", use_container_width=True)
+
+    df = pd.read_csv(FILE)
 
     bg = st.selectbox(
         "Blood Group",
@@ -127,23 +110,20 @@ elif menu == "Search Blood Group":
     )
 
     if st.button("Search"):
+        result = df[df["Blood Group"] == bg]
 
-        results = [
-            d for d in st.session_state.donors
-            if d["Blood Group"] == bg
-        ]
+        st.info(f"Total Found: {len(result)}")
 
-        st.info(f"Total Found: {len(results)}")
-
-        if results:
-            st.dataframe(pd.DataFrame(results))
-        else:
-            st.warning("No donors found")
+        st.dataframe(result)
 
 # ---------------- BLOOD REQUEST ----------------
 elif menu == "Blood Request":
 
     st.header("Blood Request")
+
+    st.image("donation.jpeg", use_container_width=True)
+
+    df = pd.read_csv(FILE)
 
     bg = st.selectbox(
         "Blood Group",
@@ -153,52 +133,51 @@ elif menu == "Blood Request":
     city = st.text_input("City")
 
     if st.button("Find"):
-
-        results = [
-            d for d in st.session_state.donors
-            if d["Blood Group"] == bg and d["City"].lower() == city.lower()
+        result = df[
+            (df["Blood Group"] == bg) &
+            (df["City"].str.lower() == city.lower())
         ]
 
-        st.info(f"Total Found: {len(results)}")
+        st.info(f"Total Found: {len(result)}")
 
-        if results:
-            st.dataframe(pd.DataFrame(results))
-        else:
-            st.warning("No matching donors")
+        st.dataframe(result)
 
 # ---------------- TOTAL ----------------
 elif menu == "Total Donors":
 
     st.header("Total Donors")
 
-    st.info(f"Total Registered Donors: {len(st.session_state.donors)}")
+    df = pd.read_csv(FILE)
+
+    st.info(f"Total Registered Donors: {len(df)}")
 
 # ---------------- CERTIFICATE ----------------
 elif menu == "Certificate":
 
     st.header("Certificate Generator")
 
+    df = pd.read_csv(FILE)
+
     name = st.text_input("Enter Donor Name")
 
     if st.button("Generate"):
 
-        donor = next(
-            (d for d in st.session_state.donors if d["Name"].lower() == name.lower()),
-            None
-        )
+        donor = df[df["Name"].str.lower() == name.lower()]
 
-        if donor:
+        if not donor.empty:
+            d = donor.iloc[0]
+
             st.success(f"""
 🏅 CERTIFICATE
 
-This is to certify that {donor['Name']}
+This is to certify that {d['Name']}
 is a registered blood donor.
 
-Blood Group: {donor['Blood Group']}
-City: {donor['City']}
-Phone: {donor['Phone']}
-Email: {donor['Email']}
-Date: {donor['Date']}
+Blood Group: {d['Blood Group']}
+City: {d['City']}
+Phone: {d['Phone']}
+Email: {d['Email']}
+Date: {d['Date']}
 
 Thank you ❤️
 """)
