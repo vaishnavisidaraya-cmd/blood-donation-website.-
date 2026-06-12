@@ -23,6 +23,12 @@ menu = st.sidebar.selectbox(
 # ---------------- HOME ----------------
 if menu == "Home":
     st.title("🩸 Blood Donation System")
+
+    try:
+        st.image("blood.png", use_container_width=True)
+    except:
+        st.warning("blood.png not found")
+
     st.write("Welcome ❤️ Help save lives")
 
 # ---------------- REGISTER ----------------
@@ -30,13 +36,20 @@ elif menu == "Register Donor":
 
     st.header("Register Donor")
 
+    try:
+        st.image("donation.png", use_container_width=True)
+    except:
+        pass
+
     name = st.text_input("Name")
     age = st.number_input("Age", 1, 100)
     weight = st.number_input("Weight (kg)", 20, 150)
+
     blood_group = st.selectbox(
         "Blood Group",
         ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
     )
+
     city = st.text_input("City")
 
     phone = st.text_input("Phone Number")
@@ -51,9 +64,9 @@ elif menu == "Register Donor":
         elif "@" not in email:
             st.error("❌ Invalid Email ID")
         elif age < 18:
-            st.error("❌ Not Eligible (Age must be 18+)")
+            st.error("❌ Not Eligible (Age < 18)")
         elif weight < 40:
-            st.error("❌ Not Eligible (Weight must be 40kg+)")
+            st.error("❌ Not Eligible (Weight < 40kg)")
         else:
             st.session_state.donors.append({
                 "Name": name,
@@ -73,6 +86,11 @@ elif menu == "View Donors":
 
     st.header("Registered Donors")
 
+    try:
+        st.image("donation.png", use_container_width=True)
+    except:
+        pass
+
     if st.session_state.donors:
 
         df = pd.DataFrame(st.session_state.donors)
@@ -91,7 +109,7 @@ elif menu == "View Donors":
             st.success("Deleted Successfully")
             st.rerun()
 
-        # GRAPH 📊
+        # 📊 GRAPH
         st.subheader("Blood Group Distribution")
         st.bar_chart(df["Blood Group"].value_counts())
 
@@ -182,7 +200,7 @@ Phone: {donor['Phone']}
 Email: {donor['Email']}
 Date: {donor['Date']}
 
-Thank you for saving lives ❤️
+Thank you ❤️
 """)
         else:
             st.error("Donor not found")
