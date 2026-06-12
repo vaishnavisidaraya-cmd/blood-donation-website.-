@@ -25,9 +25,9 @@ if menu == "Home":
     st.title("🩸 Blood Donation System")
 
     try:
-        st.image("blood.png", use_container_width=True)
+        st.image("blood.jpeg", use_container_width=True)
     except:
-        st.warning("blood.png not found")
+        st.warning("blood.jpeg not found")
 
     st.write("Welcome ❤️ Help save lives")
 
@@ -37,7 +37,7 @@ elif menu == "Register Donor":
     st.header("Register Donor")
 
     try:
-        st.image("donation.png", use_container_width=True)
+        st.image("donation.jpeg", use_container_width=True)
     except:
         pass
 
